@@ -51,9 +51,16 @@ class ShortUrlController extends Controller
                 return response()->json(['error' => 'Unauthorized'], 401);
             }
             
-            $validated = $request->validate([
-                'url' => 'required|url'
-            ]);
+            try {
+                $validated = $request->validate([
+                    'url' => 'required|url'
+                ]);
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                return response()->json([
+                    'message' => 'The given data was invalid.',
+                    'errors' => $e->errors()
+                ], 422);
+            }
 
             $response = Http::get("https://tinyurl.com/api-create.php", [
                 'url' => $validated['url']
